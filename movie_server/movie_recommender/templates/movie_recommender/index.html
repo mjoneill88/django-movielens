@@ -1,0 +1,15 @@
+{% if top_20_movies %}
+  <table>
+    <tr>
+      <th>Movie ID</th>
+      <th>Average Rating</th>
+    </tr>
+
+    {% for rating, movie in top_20_movies %}
+      <tr>
+        <td><b>{{movie}}</b></td>
+        <td>{{rating}}</td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endif %}
