@@ -1,0 +1,14 @@
+{% if movie %}
+<p>
+  <b>Title: </b>{{movie.title}}
+  <b>Movie Id: </b>{{movie.movie_id}}
+  <b>Average Rating: </b>{{average}}
+</p>
+    {% for rating in rating_list %}
+      <p>
+        User: {{rating.user_id.user_id}}
+
+      </p>
+
+    {% endfor %}
+{% endif %}

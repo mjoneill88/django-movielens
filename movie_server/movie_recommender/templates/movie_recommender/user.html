@@ -1,0 +1,17 @@
+{% if rater %}
+<p>
+  <b>User ID: </b>{{rater.user_id}}
+  <b>Age: </b>{{rater.age}}
+  <b>Gender: </b>{{rater.sex}}
+  <b>Occupation: </b> {{rater.occupation}}
+</p>
+    {% for rating in rating_list %}
+      <p>
+        Movie: {{rating.movie_id.title}}
+        Movie ID: {{rating.movie_id.movie_id}}
+        Rating: {{rating.rating}}
+
+      </p>
+
+    {% endfor %}
+{% endif %}
