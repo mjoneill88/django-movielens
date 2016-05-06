@@ -8,7 +8,7 @@
         {% with rater_id=rating.user_id.user_id %}
       <p>
         <a href="{% url 'user' rater_id %}">User: {{rating.user_id.user_id}}</a>
-
+        <b>Rating: </b>{{rating.rating}}
       </p>
       {% endwith %}
     {% endfor %}
