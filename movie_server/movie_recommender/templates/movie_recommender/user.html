@@ -6,12 +6,13 @@
   <b>Occupation: </b> {{rater.occupation}}
 </p>
     {% for rating in rating_list %}
+        {% with flick_id=rating.movie_id.movie_id %}
       <p>
-        Movie: {{rating.movie_id.title}}
+        <a href="{% url 'movie' flick_id%}">Movie: {{rating.movie_id.title}}</a>
         Movie ID: {{rating.movie_id.movie_id}}
         Rating: {{rating.rating}}
 
       </p>
-
+        {% endwith %}
     {% endfor %}
 {% endif %}
