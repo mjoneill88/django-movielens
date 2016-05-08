@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.template import loader
 from .models import Movie, Rater, Rating
 
+
 def index(request):
     average_list = []
     for movie in Movie.objects.all():
@@ -26,7 +27,7 @@ def movie(request, movie_id):
     return HttpResponse(template.render(context, request))
 
 def user(request, user_id):
-    rater = Rater.objects.get(user_id=user_id)
+    rater = Rater.objects.get(rater_id=user_id)
     rating_list = Rating.objects.filter(user_id=user_id)
     template = loader.get_template('movie_recommender/user.html')
     context = {'rater': rater,

@@ -7,7 +7,7 @@
 
     {% for rating, movie in top_20_movies %}
       <tr>
-        <td><b><a href="{% url 'movie' movie %}">{{movie}}</a></b></td>
+        <td><b><a href="{% url 'movie_recommender:movie' movie %}">{{movie}}</a></b></td>
         <td>{{rating}}</td>
       </tr>
     {% endfor %}

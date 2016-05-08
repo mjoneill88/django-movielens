@@ -1,6 +1,6 @@
 {% if rater %}
 <p>
-  <b>User ID: </b>{{rater.user_id}}
+  <b>User ID: </b>{{rater.rater_id}}
   <b>Age: </b>{{rater.age}}
   <b>Gender: </b>{{rater.sex}}
   <b>Occupation: </b> {{rater.occupation}}
@@ -8,7 +8,7 @@
     {% for rating in rating_list %}
         {% with flick_id=rating.movie_id.movie_id %}
       <p>
-        <a href="{% url 'movie' flick_id%}">Movie: {{rating.movie_id.title}}</a>
+        <a href="{% url 'movie_recommender:movie' flick_id%}">Movie: {{rating.movie_id.title}}</a>
         Movie ID: {{rating.movie_id.movie_id}}
         Rating: {{rating.rating}}
 

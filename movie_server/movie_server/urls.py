@@ -19,4 +19,5 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^movie_recommender/', include('movie_recommender.urls')),
     url(r'^admin/', admin.site.urls),
+    url('^', include('django.contrib.auth.urls'))
 ]

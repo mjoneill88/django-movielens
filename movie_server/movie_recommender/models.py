@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Movie(models.Model):
@@ -10,11 +11,12 @@ class Movie(models.Model):
 
 
 class Rater(models.Model):
-    user_id = models.IntegerField()
+    rater_id = models.IntegerField()
     age = models.IntegerField()
     sex = models.CharField(max_length=1)
     occupation = models.CharField(max_length=100)
     zip_code = models.CharField(max_length=5)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return "Rater ID: {}".format(self.user_id)

@@ -5,9 +5,9 @@
   <b>Average Rating: </b>{{average}}
 </p>
     {% for rating in rating_list %}
-        {% with rater_id=rating.user_id.user_id %}
+        {% with person_id=rating.user_id_id %}
       <p>
-        <a href="{% url 'user' rater_id %}">User: {{rating.user_id.user_id}}</a>
+        <a href="{% url 'movie_recommender:user' person_id %}">User: {{rating.user_id_id}}</a>
         <b>Rating: </b>{{rating.rating}}
       </p>
       {% endwith %}
