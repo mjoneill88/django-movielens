@@ -3,7 +3,7 @@ from django.db.models import Avg
 from django.shortcuts import render
 from django.template import loader, RequestContext
 from .models import Movie, Rater, Rating
-from .forms import RaterForm
+from .forms import RaterForm, RatingForm
 
 
 def index(request):
@@ -41,7 +41,7 @@ def user(request, user_id):
 
 def register(request):
     # Get the context from the request.
-    context = RequestContext(request)
+    # context = RequestContext(request)
 
     # A HTTP POST?
     if request.method == 'POST':
@@ -61,7 +61,7 @@ def register(request):
     else:
         # If the request was not a POST, display the form to enter details.
         form = RaterForm()
-
+    return render('registration/register.html', {'form': form})
     # Bad form (or form details), no form supplied...
     # Render the form with error messages (if any).
 
@@ -74,10 +74,8 @@ def redirect(request):
 
 
 def rate_movie(request, movie_id):
-    # context = RequestContext(request)
-
     if request.method == 'POST':
-        form = RaterForm(request.POST)
+        form = RatingForm(request.POST)
 
         if form.is_valid():
             rating = form.save(commit=False)
@@ -89,5 +87,9 @@ def rate_movie(request, movie_id):
             print(form.errors)
     else:
         # If the request was not a POST, display the form to enter details.
-        form = RaterForm()
-    return render('registration/register.html', {'form': form})
+        form = RatingForm()
+    movie_average = Rating.objects.filter(movie_id=movie_id).aggregate(Avg('rating'))
+    context = {'form': form,
+               'movie': Movie.objects.get(movie_id=movie_id),
+               'movie_average': movie_average['rating__avg']}
+    return render(request, 'movie_recommender/rate_movie.html', context)

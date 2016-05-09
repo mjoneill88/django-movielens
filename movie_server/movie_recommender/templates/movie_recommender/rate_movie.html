@@ -5,9 +5,18 @@
     </head>
 
     <body>
+        {% if user.is_authenticated %}
+        {% with current_id=user.rater.rater_id %}
+        <p>Welcome, <a href="{% url 'movie_recommender:user' current_id %}">{{ user.username }}</a>. Thanks for logging in. <a href="{% url 'logout' %}">Log Out</a></p>
+        {% endwith %}
+        {% else %}
+            <p>Welcome, new user. Please <a href="{% url 'login' %}">log in</a>.</p>
+        {% endif %}
         <h1>Add Rating</h1>
-
-        <form id="rate_movie_form" method="post" action="/movie_recommender/rate_movie/">
+<p>
+    Please add your rating for {{movie.title}}. Its average rating is: {{movie_average}}.
+</p>
+        <form id="RatingForm" method="post" action="">
 
             {% csrf_token %}
             {% for hidden in form.hidden_fields %}
