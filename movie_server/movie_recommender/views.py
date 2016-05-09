@@ -1,7 +1,8 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models import Avg
 from django.shortcuts import render
-from django.template import loader, RequestContext
+from django.template import loader
+from django.contrib.auth.models import User
 from .models import Movie, Rater, Rating
 from .forms import RaterForm, RatingForm
 
@@ -9,14 +10,16 @@ from .forms import RaterForm, RatingForm
 def index(request):
     average_list = []
     for movie in Movie.objects.all():
-        if len(Rating.objects.filter(movie_id=movie.id)) > 10:
-            movie_average = Rating.objects.filter(movie_id=movie.id).aggregate(Avg('rating'))
+        movie_ratings = Rating.objects.filter(movie_id=movie.id)
+        if movie_ratings.count() > 10:
+            movie_average = movie_ratings.aggregate(Avg('rating'))
             average_list.append((movie_average['rating__avg'], movie.movie_id))
     descending_average_ratings = sorted(average_list, reverse=True)
     top_20_movies = descending_average_ratings[:20]
     template = loader.get_template('movie_recommender/index.html')
     context = {'top_20_movies': top_20_movies}
     return HttpResponse(template.render(context, request))
+
 
 def movie(request, movie_id):
     movie = Movie.objects.get(movie_id=movie_id)
@@ -30,6 +33,7 @@ def movie(request, movie_id):
                'rater_queries': rater_queries}
     return HttpResponse(template.render(context, request))
 
+
 def user(request, user_id):
     rater = Rater.objects.get(rater_id=user_id)
     rating_list = Rating.objects.filter(user_id=rater.id)
@@ -40,36 +44,34 @@ def user(request, user_id):
 
 
 def register(request):
-    # Get the context from the request.
-    # context = RequestContext(request)
-
-    # A HTTP POST?
+    new_id = Rater.objects.last().rater_id + 1
     if request.method == 'POST':
         form = RaterForm(request.POST)
 
-        # Have we been provided with a valid form?
         if form.is_valid():
-            # Save the new category to the database.
-            form.save(commit=True)
-
-            # Now call the index() view.
-            # The user will be shown the homepage.
-            return index(request)
+            new_rater = form.save(commit=False)
+            new_rater.rater_id = new_id
+            user = User.objects.create_user('rater{}'.format(new_id),
+                                            'rater{}@here.com'.format(new_id),
+                                            'rater{}password'.format(new_id))
+            user.save()
+            new_rater.user = user
+            new_rater.save()
+            return user_redirect(request)
         else:
-            # The supplied form contained errors - just print them to the terminal.
             print(form.errors)
     else:
-        # If the request was not a POST, display the form to enter details.
         form = RaterForm()
-    return render('registration/register.html', {'form': form})
-    # Bad form (or form details), no form supplied...
-    # Render the form with error messages (if any).
-
-    # , context_instance=context
+    return render(request, 'registration/register.html', {'form': form})
 
 
-def redirect(request):
+def user_redirect(request):
     url = '/movie_recommender/user{}/'.format(request.user.rater.rater_id)
+    return HttpResponseRedirect(url)
+
+
+def movie_redirect(request, movie_id):
+    url = '/movie_recommender/movie{}/'.format(movie_id)
     return HttpResponseRedirect(url)
 
 
@@ -82,7 +84,7 @@ def rate_movie(request, movie_id):
             rating.movie_id = Movie.objects.get(movie_id=movie_id)
             rating.user_id = Rater.objects.get(rater_id=request.user.rater.rater_id)
             rating.save()
-            return index(request)
+            return movie_redirect(request, movie_id)
         else:
             print(form.errors)
     else:

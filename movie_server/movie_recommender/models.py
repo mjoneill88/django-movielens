@@ -11,9 +11,13 @@ class Movie(models.Model):
 
 
 class Rater(models.Model):
+    sex_choices = (
+        ('F', 'F'),
+        ('M', 'M')
+    )
     rater_id = models.IntegerField()
     age = models.IntegerField()
-    sex = models.CharField(max_length=1)
+    sex = models.CharField(max_length=1, choices=sex_choices)
     occupation = models.CharField(max_length=100)
     zip_code = models.CharField(max_length=5)
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
