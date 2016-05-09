@@ -23,9 +23,16 @@ class Rater(models.Model):
 
 
 class Rating(models.Model):
+    rating_choices = (
+        (1, 1),
+        (2, 2),
+        (3, 3),
+        (4, 4),
+        (5, 5)
+    )
     user_id = models.ForeignKey(Rater, on_delete=models.CASCADE)
     movie_id = models.ForeignKey(Movie, on_delete=models.CASCADE)
-    rating = models.IntegerField()
+    rating = models.IntegerField(choices=rating_choices)
 
     def __str__(self):
         return "{}: {}\nUser {} : Rating {}".format(self.movie_id.movie_id,
