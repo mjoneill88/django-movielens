@@ -74,14 +74,16 @@ def redirect(request):
 
 
 def rate_movie(request, movie_id):
-    context = RequestContext(request)
+    # context = RequestContext(request)
 
     if request.method == 'POST':
         form = RaterForm(request.POST)
 
         if form.is_valid():
-            form.save(commit=True)
-
+            rating = form.save(commit=False)
+            rating.movie_id = Movie.objects.get(movie_id=movie_id)
+            rating.user_id = Rater.objects.get(rater_id=request.user.rater.rater_id)
+            rating.save()
             return index(request)
         else:
             print(form.errors)
