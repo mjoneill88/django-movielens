@@ -9,8 +9,9 @@ from .forms import RaterForm
 def index(request):
     average_list = []
     for movie in Movie.objects.all():
-        movie_average = Rating.objects.filter(movie_id=movie.id).aggregate(Avg('rating'))
-        average_list.append((movie_average['rating__avg'], movie.movie_id))
+        if len(Rating.objects.filter(movie_id=movie.id)) > 10:
+            movie_average = Rating.objects.filter(movie_id=movie.id).aggregate(Avg('rating'))
+            average_list.append((movie_average['rating__avg'], movie.movie_id))
     descending_average_ratings = sorted(average_list, reverse=True)
     top_20_movies = descending_average_ratings[:20]
     template = loader.get_template('movie_recommender/index.html')
@@ -20,11 +21,13 @@ def index(request):
 def movie(request, movie_id):
     movie = Movie.objects.get(movie_id=movie_id)
     rating_list = Rating.objects.filter(movie_id=movie.id)
+    rater_queries = rating_list.values_list('user_id', flat=True)
     movie_average = Rating.objects.filter(movie_id=movie.id).aggregate(Avg('rating'))
     template = loader.get_template('movie_recommender/movie.html')
     context = {'movie': movie,
                'rating_list': rating_list,
-               'average': movie_average['rating__avg']}
+               'average': movie_average['rating__avg'],
+               'rater_queries': rater_queries}
     return HttpResponse(template.render(context, request))
 
 def user(request, user_id):
@@ -86,4 +89,3 @@ def rate_movie(request, movie_id):
         # If the request was not a POST, display the form to enter details.
         form = RaterForm()
     return render('registration/register.html', {'form': form})
-    

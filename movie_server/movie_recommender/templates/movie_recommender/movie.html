@@ -1,5 +1,14 @@
 {% if user.is_authenticated %}
-    <p>Welcome, {{ user.username }}. Thanks for logging in. <a href="{% url 'logout' %}">Log Out</a></p>
+    {% with current_id=user.rater.rater_id %}
+    <p>Welcome, <a href="{% url 'movie_recommender:user' current_id %}">{{ user.username }}</a>. Thanks for logging in. <a href="{% url 'logout' %}">Log Out</a></p>
+    {% endwith %}
+    {% if user.rater.rater_id not in rater_queries %}
+    <p>
+        {% with flick_id=movie.movie_id %}
+    <a href="{% url 'movie_recommender:rate_movie' flick_id %}">Rate {{movie.title}}</a>.
+    {% endwith %}
+    </p>
+    {% endif %}
 {% else %}
     <p>Welcome, new user. Please <a href="{% url 'login' %}">log in</a>.</p>
 {% endif %}
