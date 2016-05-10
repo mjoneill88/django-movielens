@@ -1,7 +1,5 @@
-from django.http import HttpResponse, HttpResponseRedirect
-from django.db.models import Avg, Count
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.template import loader
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from .models import Movie, Rater, Rating
@@ -53,13 +51,15 @@ def register(request):
         if form.is_valid():
             new_rater = form.save(commit=False)
             new_rater.rater_id = new_id
-            new_user = User.objects.create_user('rater{}'.format(new_id),
-                                                'rater{}@here.com'.format(new_id),
-                                                'rater{}password'.format(new_id))
+            new_user = User.objects.create_user(
+                'rater{}'.format(new_id),
+                'rater{}@here.com'.format(new_id),
+                'rater{}password'.format(new_id))
             new_user.save()
             new_rater.user = new_user
             new_rater.save()
-            user = authenticate(username=new_user.username, password='rater{}password'.format(new_id))
+            user = authenticate(username=new_user.username,
+                                password='rater{}password'.format(new_id))
             if user is not None:
                 if user.is_active:
                     login(request, user)
@@ -88,7 +88,8 @@ def rate_movie(request, movie_id):
         if form.is_valid():
             rating = form.save(commit=False)
             rating.movie_id = Movie.objects.get(movie_id=movie_id)
-            rating.user_id = Rater.objects.get(rater_id=request.user.rater.rater_id)
+            rating.user_id = Rater.objects.get(
+                rater_id=request.user.rater.rater_id)
             rating.save()
             return movie_redirect(request, movie_id)
         else:
@@ -96,8 +97,8 @@ def rate_movie(request, movie_id):
     else:
         # If the request was not a POST, display the form to enter details.
         form = RatingForm()
-    movie_average = Rating.objects.filter(movie_id=movie_id).aggregate(Avg('rating'))
+    movie_average = Movie.objects.get(movie_id=movie_id).get_average_rating()
     context = {'form': form,
                'movie': Movie.objects.get(movie_id=movie_id),
-               'movie_average': movie_average['rating__avg']}
+               'movie_average': movie_average}
     return render(request, 'movie_recommender/rate_movie.html', context)
