@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models import Avg, Count
 
 
 class Movie(models.Model):
@@ -8,6 +9,11 @@ class Movie(models.Model):
 
     def __str__(self):
         return "{}: {}".format(self.movie_id, self.title)
+
+    def get_average_rating(self):
+        movie_ratings = Rating.objects.filter(movie_id=self.id)
+        movie_average = movie_ratings.aggregate(models.Avg('rating'))
+        return movie_average['rating__avg']
 
 
 class Rater(models.Model):
@@ -39,8 +45,17 @@ class Rating(models.Model):
     rating = models.IntegerField(choices=rating_choices)
 
     def __str__(self):
-        return "{}: {}\nUser {} : Rating {}".format(self.movie_id.movie_id,
-                                                    self.movie_id.title,
-                                                    self.user_id.user_id,
-                                                    self.rating)
-# Create your models here.
+        return "Movie {}: {}\nUser {} : Rating {}".format(
+            self.movie_id.movie_id,
+            self.movie_id.title,
+            self.user_id.user_id,
+            self.rating)
+
+    @staticmethod
+    def get_top_rated_movies(ratings_set, number_of_movies):
+        pop_movies = ratings_set.annotate(
+            count=Count('movie_id')).filter(count__gt=9)
+        sorted_movies = pop_movies.values('movie_id').annotate(
+            avg_rating=Avg('rating')).order_by('-avg_rating')
+        tuple_list = [(x['movie_id'], x['avg_rating']) for x in sorted_movies]
+        return tuple_list[:number_of_movies]

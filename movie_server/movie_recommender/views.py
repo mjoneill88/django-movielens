@@ -1,46 +1,48 @@
 from django.http import HttpResponse, HttpResponseRedirect
-from django.db.models import Avg
+from django.db.models import Avg, Count
 from django.shortcuts import render
 from django.template import loader
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login
 from .models import Movie, Rater, Rating
 from .forms import RaterForm, RatingForm
 
 
 def index(request):
-    average_list = []
-    for movie in Movie.objects.all():
-        movie_ratings = Rating.objects.filter(movie_id=movie.id)
-        if movie_ratings.count() > 10:
-            movie_average = movie_ratings.aggregate(Avg('rating'))
-            average_list.append((movie_average['rating__avg'], movie.movie_id))
-    descending_average_ratings = sorted(average_list, reverse=True)
-    top_20_movies = descending_average_ratings[:20]
-    template = loader.get_template('movie_recommender/index.html')
+    all_ratings = Rating.objects.all()
+    top_20_movies = Rating.get_top_rated_movies(all_ratings, 20)
     context = {'top_20_movies': top_20_movies}
-    return HttpResponse(template.render(context, request))
+    return render(request, 'movie_recommender/index.html', context)
 
 
 def movie(request, movie_id):
     movie = Movie.objects.get(movie_id=movie_id)
     rating_list = Rating.objects.filter(movie_id=movie.id)
     rater_queries = rating_list.values_list('user_id', flat=True)
-    movie_average = Rating.objects.filter(movie_id=movie.id).aggregate(Avg('rating'))
-    template = loader.get_template('movie_recommender/movie.html')
+    movie_average = movie.get_average_rating
     context = {'movie': movie,
                'rating_list': rating_list,
-               'average': movie_average['rating__avg'],
+               'average': movie_average,
                'rater_queries': rater_queries}
-    return HttpResponse(template.render(context, request))
+    return render(request, 'movie_recommender/movie.html', context)
 
 
 def user(request, user_id):
     rater = Rater.objects.get(rater_id=user_id)
     rating_list = Rating.objects.filter(user_id=rater.id)
-    template = loader.get_template('movie_recommender/user.html')
-    context = {'rater': rater,
-               'rating_list': rating_list}
-    return HttpResponse(template.render(context, request))
+    page_user = User.objects.get(username='rater{}'.format(user_id))
+    if request.user == page_user:
+        seen_movies = rating_list.values_list(
+            'movie_id', flat=True)
+        unseen_ratings = Rating.objects.exclude(movie_id__in=seen_movies)
+        top_20_movies = Rating.get_top_rated_movies(unseen_ratings, 20)
+        context = {'top_20_movies': top_20_movies,
+                   'rating_list': rating_list,
+                   'rater': rater}
+    else:
+        context = {'rater': rater,
+                   'rating_list': rating_list}
+    return render(request, 'movie_recommender/user.html', context)
 
 
 def register(request):
@@ -51,12 +53,16 @@ def register(request):
         if form.is_valid():
             new_rater = form.save(commit=False)
             new_rater.rater_id = new_id
-            user = User.objects.create_user('rater{}'.format(new_id),
-                                            'rater{}@here.com'.format(new_id),
-                                            'rater{}password'.format(new_id))
-            user.save()
-            new_rater.user = user
+            new_user = User.objects.create_user('rater{}'.format(new_id),
+                                                'rater{}@here.com'.format(new_id),
+                                                'rater{}password'.format(new_id))
+            new_user.save()
+            new_rater.user = new_user
             new_rater.save()
+            user = authenticate(username=new_user.username, password='rater{}password'.format(new_id))
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
             return user_redirect(request)
         else:
             print(form.errors)

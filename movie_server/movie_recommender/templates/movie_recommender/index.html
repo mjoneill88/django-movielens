@@ -5,6 +5,7 @@
 {% else %}
     <p>Welcome, new user. Please <a href="{% url 'login' %}">log in</a>.</p>
 {% endif %}
+<a href="{% url 'movie_recommender:index' %}">Home</a>
 {% if top_20_movies %}
   <table>
     <tr>
@@ -12,10 +13,10 @@
       <th>Average Rating</th>
     </tr>
 
-    {% for rating, movie in top_20_movies %}
+    {% for movie, avg_rating in top_20_movies %}
       <tr>
         <td><b><a href="{% url 'movie_recommender:movie' movie %}">{{movie}}</a></b></td>
-        <td>{{rating}}</td>
+        <td>{{avg_rating}}</td>
       </tr>
     {% endfor %}
   </table>

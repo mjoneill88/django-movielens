@@ -5,6 +5,7 @@
 {% else %}
     <p>Welcome, new user. Please <a href="{% url 'login' %}">log in</a>.</p>
 {% endif %}
+<a href="{% url 'movie_recommender:index' %}">Home</a>
 {% if rater %}
 <p>
   <b>User ID: </b>{{rater.rater_id}}
@@ -12,6 +13,23 @@
   <b>Gender: </b>{{rater.sex}}
   <b>Occupation: </b> {{rater.occupation}}
 </p>
+
+<h2>Top 20 Unrated Movies</h2>
+{% if top_20_movies %}
+  <table>
+    <tr>
+      <th>Movie ID</th>
+      <th>Average Rating</th>
+    </tr>
+
+    {% for movie, avg_rating in top_20_movies %}
+      <tr>
+        <td><b><a href="{% url 'movie_recommender:movie' movie %}">{{movie}}</a></b></td>
+        <td>{{avg_rating}}</td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endif %}
     {% for rating in rating_list %}
         {% with flick_id=rating.movie_id.movie_id %}
       <p>
