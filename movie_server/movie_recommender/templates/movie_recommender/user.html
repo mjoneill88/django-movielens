@@ -3,7 +3,8 @@
 <p>Welcome, <a href="{% url 'movie_recommender:user' current_id %}">{{ user.username }}</a>. Thanks for logging in. <a href="{% url 'logout' %}">Log Out</a></p>
 {% endwith %}
 {% else %}
-    <p>Welcome, new user. Please <a href="{% url 'login' %}">log in</a>.</p>
+<p>Welcome, new user. Please <a href="{% url 'login' %}">log in</a>.
+Or <a href="/register">register</a></p>
 {% endif %}
 <a href="{% url 'movie_recommender:index' %}">Home</a>
 {% if rater %}

@@ -10,7 +10,8 @@
     </p>
     {% endif %}
 {% else %}
-    <p>Welcome, new user. Please <a href="{% url 'login' %}">log in</a>.</p>
+<p>Welcome, new user. Please <a href="{% url 'login' %}">log in</a>.
+Or <a href="/register">register</a></p>
 {% endif %}
 <a href="{% url 'movie_recommender:index' %}">Home</a>
 {% if movie %}
